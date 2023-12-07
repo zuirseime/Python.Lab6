@@ -8,6 +8,9 @@ class Fight:
         self.survivors = []
         self.is_conducted = False
 
+    """
+    Conducts a fight between some number of creatures
+    """
     def conduct(self, random: bool):
         if self.is_conducted:
             return
@@ -17,7 +20,7 @@ class Fight:
             for creature in self.creatures:
                 creature.is_in_fight = False
             return
-        
+
         if random:
             shuffle(self.creatures)
 
@@ -45,9 +48,15 @@ class Fight:
                     survivor.is_in_fight = False
 
             self.is_conducted = True
-    
+
+    """
+    Returns the state of fight conduction
+    """
     def __bool__(self):
         return self.is_conducted
 
+    """
+    Returns the string of the fight
+    """
     def __str__(self):
         return f"Fight conducted: {self.is_conducted}\nSurvivors:{[str(creature) for creature in self.survivors]}"

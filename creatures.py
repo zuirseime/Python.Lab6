@@ -4,6 +4,9 @@ from creature_type import CreatureType
 import random
 
 
+"""
+Conducts a fight
+"""
 def conduct_fight(random_order: bool, *creatures):
     for creature in creatures:
         creature.is_in_fight = True
@@ -38,21 +41,36 @@ class Creature(Sprite):
         self.max_hunger = max_hunger
         self.hunger = 0
 
+    """
+    Takes a damage from another creature
+    """
     def take_damage(self, damage):
         if self.is_alive():
             self.heal_points -= damage
 
+    """
+    Makes the creature die
+    """
     def die(self):
         self.heal_points = 0
 
+    """
+    Checks if the creature is alive
+    """
     def is_alive(self):
         return self.heal_points > 0
 
+    """
+    Restores creature parameters
+    """
     def restore(self, target):
         self.hunger = 0
         self.heal_points = self.base_hp
         self.strength = self.base_strength
 
+    """
+    Updates creature state
+    """
     def update(self, map, creatures):
         self.map = map
         self.creatures = creatures
@@ -69,10 +87,16 @@ class Creature(Sprite):
         if not self.is_alive():
             self.die()
 
-    def move(self, desitnation):
+    """
+    Moves the creature to another position
+    """
+    def move(self, destination):
         self.map.data[self.position[0]][self.position[1]].walk_through(self.creature_type)
-        self.position = desitnation
+        self.position = destination
 
+    """
+    Confirms move
+    """
     def __confirm_move(self, destination, condition):
         if condition:
             self.direction = (destination[0] - self.position[0], destination[1] - self.position[1])
@@ -80,14 +104,23 @@ class Creature(Sprite):
             return True
         return False
 
+    """
+    Makes the creature look for the enemy around
+    """
     def look_for_enemy(self):
         adjacent_creatures = [creature for creature in self.creatures if creature is not self]
 
         self.attack_if_adjacent(*adjacent_creatures)
 
+    """
+    Checks if a certain creature is adjacent to this one
+    """
     def is_adjacent(self, other):
         return abs(self.position[0] - other.position[0]) <= 1 and abs(self.position[1] - other.position[1]) <= 1
 
+    """
+    Makes creature attack certain creatures if they are adjacent to this one
+    """
     def attack_if_adjacent(self, *creatures):
         fighters = [fighter for fighter in creatures if self.is_adjacent(fighter)
                     and isinstance(fighter, Creature)
@@ -97,6 +130,9 @@ class Creature(Sprite):
         if fighters:
             conduct_fight(True, *fighters)
 
+    """
+    Tries to choose random way to move
+    """
     def choose_random_way(self):
         while True:
             raw_direction = random.choice(self.directions)
@@ -107,7 +143,10 @@ class Creature(Sprite):
                 condition = not any(c.position == destination for c in self.creatures)
                 return self.__confirm_move(destination, condition)
 
-    def search_for_food(self):
+    """
+    Tries to look for food around
+    """
+    def look_for_food(self):
         destination = self.position
 
         for direction in self.directions:
@@ -116,13 +155,16 @@ class Creature(Sprite):
             if self.map.contains(new_position):
                 x = new_position[0]
                 y = new_position[1]
-                if(isinstance(self, Prey) and self.map.data[x][y].has_grass or
-                   isinstance(self, Predator) and any(isinstance(c, Prey)
-                                                      and c.position == new_position for c in self.creatures)):
+                if (isinstance(self, Prey) and self.map.data[x][y].has_grass or
+                        isinstance(self, Predator) and any(isinstance(c, Prey)
+                                                           and c.position == new_position for c in self.creatures)):
                     destination = new_position
 
         return self.__confirm_move(destination, destination != self.position)
 
+    """
+    Tries to look for traces around
+    """
     def search_for_traces(self, limit: float, func):
         destination = self.position
 
@@ -130,7 +172,7 @@ class Creature(Sprite):
             new_position = (self.position[0] + direction[0], self.position[1] + direction[1])
 
             if self.map.contains(new_position):
-                value = self.map.data[new_position[0]][new_position[1]].trace_magnitute
+                value = self.map.data[new_position[0]][new_position[1]].trace_magnitude
                 trace = self.map.data[new_position[0]][new_position[1]].trace_status
 
                 is_destination_free = not any(c.position == new_position for c in self.creatures)
@@ -143,6 +185,9 @@ class Creature(Sprite):
 
         return self.__confirm_move(destination, destination != self.position)
 
+    """
+    Builds the string of creature parameters
+    """
     def __str__(self):
         return (f"{self.position} {self.creature_type} | "
                 f"HP: {self.heal_points}/{self.base_hp} "
@@ -154,6 +199,9 @@ class Prey(Creature):
     def __init__(self, position: tuple) -> None:
         super().__init__("prey", position, CreatureType.Prey, 100, 5, 10)
 
+    """
+    Moves the creature to another position
+    """
     def move(self, destination):
         super().move(destination)
 
@@ -163,15 +211,21 @@ class Prey(Creature):
             if cell.has_grass and not self.is_in_fight:
                 self.restore(cell)
 
+    """
+    Restores creature parameters
+    """
     def restore(self, cell):
         super().restore(cell)
         cell.has_grass = False
 
+    """
+    Updates creature state
+    """
     def update(self, map, creatures):
         super().update(map, creatures)
 
         if self.hunger == self.max_hunger:
-            if self.search_for_food():
+            if self.look_for_food():
                 return
 
         if self.search_for_traces(float('inf'), lambda v, l: v < l):
@@ -183,8 +237,11 @@ class Prey(Creature):
 
 class Predator(Creature):
     def __init__(self, position: tuple) -> None:
-        super().__init__("predator", position, CreatureType.Predator, 200, 30, 15)
+        super().__init__("predator", position, CreatureType.Predator, 200, 20, 15)
 
+    """
+    Moves the creature to another position
+    """
     def move(self, destination):
         super().move(destination)
 
@@ -193,13 +250,19 @@ class Predator(Creature):
         if target and not self.is_in_fight:
             conduct_fight(False, self, target)
 
+    """
+    Restores creature parameters
+    """
     def restore(self, target=None):
         super().restore(target)
 
+    """
+    Updates creature state
+    """
     def update(self, map, creatures):
         super().update(map, creatures)
 
-        if self.search_for_food():
+        if self.look_for_food():
             return
         if self.search_for_traces(float('-inf'), lambda v, l: v > l):
             return
