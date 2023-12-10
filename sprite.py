@@ -1,9 +1,10 @@
 import pygame
+from pygame import Surface
 from globals import *
 
 textures = {}
 
-texture_data = {
+raw_textures_data = {
     'cell': {'type': 'cell', 'file_path': 'res/cell.png', 'size': (SPRITE_SIZE, SPRITE_SIZE)},
     'grass': {'type': 'grass', 'file_path': 'res/grass.png', 'size': (SPRITE_SIZE, SPRITE_SIZE)},
     'predator': {'type': 'creature', 'file_path': 'res/predator.png', 'size': (SPRITE_SIZE, SPRITE_SIZE)},
@@ -21,7 +22,7 @@ class Sprite:
     """
     Draws the sprite
     """
-    def draw(self, surface):
+    def draw(self, surface: Surface):
         position = (self.position[0] * SPRITE_SIZE, self.position[1] * SPRITE_SIZE)
         surface.blit(self.image, position)
 
@@ -29,14 +30,13 @@ class Sprite:
     Generates sprite textures from pictures
     """
     @staticmethod
-    def gen_textures():
-        for name, data in texture_data.items():
-            textures[name] = pygame.transform.scale(pygame.image.load(data['file_path']).convert_alpha(),
-                                                    (data['size']))
+    def gen_textures() -> None:
+        for name, data in raw_textures_data.items():
+            textures[name] = pygame.transform.scale(pygame.image.load(data['file_path']).convert_alpha(), (data['size']))
 
     """
     Gives a certain sprite texture
     """
     @staticmethod
-    def get_texture(name: str):
+    def get_texture(name: str) -> Surface:
         return textures[name]

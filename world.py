@@ -2,13 +2,13 @@ from globals import *
 from map import Map
 from creatures import *
 import random
+from pygame import Surface
 
 
 class World:
     __tick = TICK
     __time_elapsed = 0
 
-    __map = None
     __creatures = []
 
     def __init__(self, map_size: tuple, predators: int, preys: int) -> None:
@@ -46,7 +46,7 @@ class World:
     """
     Updates the parts of the world
     """
-    def update(self, delta_time):
+    def update(self, delta_time: int):
         self.__time_elapsed += delta_time
 
         if self.__time_elapsed >= self.__tick:
@@ -56,7 +56,7 @@ class World:
     """
     Draws the parts of the world
     """
-    def draw(self, screen):
+    def draw(self, screen: Surface):
         self.__map.draw(screen)
 
         for creature in self.__creatures:

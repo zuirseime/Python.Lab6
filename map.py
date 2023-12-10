@@ -1,8 +1,9 @@
+from pygame import Surface
 from cell import Cell
 
 
 class Map:
-    def __init__(self, width, height) -> None:
+    def __init__(self, width: int, height: int) -> None:
         self.__width = width
         self.__height = height
 
@@ -19,7 +20,7 @@ class Map:
     """
     Draws the map elements
     """
-    def draw(self, surface):
+    def draw(self, surface: Surface):
         for row in self.data:
             for cell in row:
                 cell.draw(surface)

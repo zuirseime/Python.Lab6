@@ -4,21 +4,6 @@ from creature_type import CreatureType
 import random
 
 
-"""
-Conducts a fight
-"""
-def conduct_fight(random_order: bool, *creatures):
-    for creature in creatures:
-        creature.is_in_fight = True
-
-    if len(creatures) > 0:
-        fight = Fight(*creatures)
-        fight.conduct(random_order)
-
-        if fight:
-            print(fight)
-
-
 class Creature(Sprite):
     directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
@@ -42,9 +27,24 @@ class Creature(Sprite):
         self.hunger = 0
 
     """
+    Conducts a fight
+    """
+    @staticmethod
+    def conduct_fight(random_order: bool, *creatures):
+        for creature in creatures:
+            creature.is_in_fight = True
+
+        if len(creatures) > 0:
+            fight = Fight(*creatures)
+            fight.conduct(random_order)
+
+            if fight:
+                print(fight)
+
+    """
     Takes a damage from another creature
     """
-    def take_damage(self, damage):
+    def take_damage(self, damage: int):
         if self.is_alive():
             self.heal_points -= damage
 
@@ -71,7 +71,7 @@ class Creature(Sprite):
     """
     Updates creature state
     """
-    def update(self, map, creatures):
+    def update(self, map, creatures: list):
         self.map = map
         self.creatures = creatures
 
@@ -90,7 +90,7 @@ class Creature(Sprite):
     """
     Moves the creature to another position
     """
-    def move(self, destination):
+    def move(self, destination: tuple):
         self.map.data[self.position[0]][self.position[1]].walk_through(self.creature_type)
         self.position = destination
 
@@ -128,7 +128,7 @@ class Creature(Sprite):
                     and not fighter.is_in_fight]
 
         if fighters:
-            conduct_fight(True, *fighters)
+            self.conduct_fight(True, *fighters)
 
     """
     Tries to choose random way to move
@@ -165,7 +165,7 @@ class Creature(Sprite):
     """
     Tries to look for traces around
     """
-    def search_for_traces(self, limit: float, func):
+    def look_for_traces(self, limit: float, func):
         destination = self.position
 
         for direction in self.directions:
@@ -202,7 +202,7 @@ class Prey(Creature):
     """
     Moves the creature to another position
     """
-    def move(self, destination):
+    def move(self, destination: tuple):
         super().move(destination)
 
         if self.map.contains(self.position):
@@ -228,7 +228,7 @@ class Prey(Creature):
             if self.look_for_food():
                 return
 
-        if self.search_for_traces(float('inf'), lambda v, l: v < l):
+        if self.look_for_traces(float('inf'), lambda v, l: v < l):
             return
         self.choose_random_way()
 
@@ -248,7 +248,7 @@ class Predator(Creature):
         target = next((creature for creature in self.creatures if isinstance(creature, Prey)
                        and creature.position == destination), None)
         if target and not self.is_in_fight:
-            conduct_fight(False, self, target)
+            self.conduct_fight(False, self, target)
 
     """
     Restores creature parameters
@@ -264,7 +264,7 @@ class Predator(Creature):
 
         if self.look_for_food():
             return
-        if self.search_for_traces(float('-inf'), lambda v, l: v > l):
+        if self.look_for_traces(float('-inf'), lambda v, l: v > l):
             return
         self.choose_random_way()
 
