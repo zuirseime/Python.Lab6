@@ -7,12 +7,8 @@ import random
 class Creature(Sprite):
     directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
-    is_in_fight = False
-
     map = None
     creatures = None
-
-    direction = (0, 0)
 
     def __init__(self, name: str, position: tuple,
                  creature_type: CreatureType,
@@ -25,6 +21,9 @@ class Creature(Sprite):
         self.strength = max_strength
         self.max_hunger = max_hunger
         self.hunger = 0
+
+        self.is_in_fight = False
+        self.direction = (0, 0)
 
     """
     Conducts a fight

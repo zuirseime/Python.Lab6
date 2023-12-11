@@ -7,12 +7,13 @@ from pygame import Surface
 
 class World:
     __tick = TICK
-    __time_elapsed = 0
 
     __creatures = []
 
     def __init__(self, map_size: tuple, predators: int, preys: int) -> None:
         self.__map = Map(map_size[0], map_size[1])
+
+        self.__time_elapsed = 0
 
         for _ in range(predators):
             while True:

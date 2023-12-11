@@ -4,9 +4,8 @@ import random
 
 
 class Cell(Sprite):
-    __grass_birth_probability = 0.2
+    __grass_birth_probability = 0.02
 
-    __grass_cooldown_state = 0
     __grass_cooldown = 5
 
     def __init__(self, position: tuple) -> None:
@@ -16,6 +15,8 @@ class Cell(Sprite):
         self.has_grass = False
         self.trace_status = CreatureType.Null
         self.trace_magnitude = 0
+
+        self.__grass_cooldown_state = 0
 
     def walk_through(self, trace: CreatureType):
         self.trace_magnitude = 10
