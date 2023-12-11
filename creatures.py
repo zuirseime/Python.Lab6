@@ -194,6 +194,12 @@ class Creature(Sprite):
                 f"S: {self.strength}/{self.base_strength} "
                 f"H: {self.hunger}/{self.max_hunger}")
 
+    """
+    Checks if the creature is alive
+    """
+    def __bool__(self):
+        return self.is_alive()
+
 
 class Prey(Creature):
     def __init__(self, position: tuple) -> None:

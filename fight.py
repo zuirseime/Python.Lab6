@@ -39,7 +39,7 @@ class Fight:
                 for target in targets:
                     target.take_damage(attacker.strength)
 
-            self.survivors = [creature for creature in self.creatures if creature.is_alive()]
+            self.survivors = [creature for creature in self.creatures if creature]
 
             for survivor in self.survivors:
                 if len(self.survivors) < len(self.creatures):
