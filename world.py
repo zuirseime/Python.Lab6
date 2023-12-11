@@ -8,10 +8,9 @@ from pygame import Surface
 class World:
     __tick = TICK
 
-    __creatures = []
-
     def __init__(self, map_size: tuple, predators: int, preys: int) -> None:
         self.__map = Map(map_size[0], map_size[1])
+        self.__creatures = []
 
         self.__time_elapsed = 0
 
@@ -37,7 +36,7 @@ class World:
     def __next_step(self):
         self.__map.update()
 
-        dead_list = [creature for creature in self.__creatures if not creature.is_alive()]
+        dead_list = [creature for creature in self.__creatures if not creature]
         for creature in dead_list:
             self.__creatures.remove(creature)
 

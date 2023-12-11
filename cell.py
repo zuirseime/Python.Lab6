@@ -28,10 +28,10 @@ class Cell(Sprite):
         elif trace == CreatureType.Prey:
             self.__steps_texture = Sprite("prey_steps", self.position)
 
-    def fade_out(self):
+    def __fade_out(self):
         self.trace_magnitude -= 1
 
-    def grow_grass(self):
+    def __grow_grass(self):
         if self.__grass_cooldown_state == self.__grass_cooldown:
             if random.random() <= self.__grass_birth_probability:
                 self.has_grass = True
@@ -42,10 +42,10 @@ class Cell(Sprite):
         if self.__grass_cooldown_state < self.__grass_cooldown:
             self.__grass_cooldown_state += 1
         else:
-            self.grow_grass()
+            self.__grow_grass()
 
         if self.trace_magnitude > 0:
-            self.fade_out()
+            self.__fade_out()
         else:
             self.trace_status = CreatureType.Null
             self.__steps_texture = None

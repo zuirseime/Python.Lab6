@@ -44,7 +44,7 @@ class Creature(Sprite):
     Takes a damage from another creature
     """
     def take_damage(self, damage: int):
-        if self.is_alive():
+        if self.__is_alive():
             self.heal_points -= damage
 
     """
@@ -56,7 +56,7 @@ class Creature(Sprite):
     """
     Checks if the creature is alive
     """
-    def is_alive(self):
+    def __is_alive(self):
         return self.heal_points > 0
 
     """
@@ -83,13 +83,13 @@ class Creature(Sprite):
             if self.strength <= self.base_strength / 2:
                 self.heal_points -= 1
 
-        if not self.is_alive():
+        if not self.__is_alive():
             self.die()
 
     """
     Moves the creature to another position
     """
-    def move(self, destination: tuple):
+    def _move(self, destination: tuple):
         self.map.data[self.position[0]][self.position[1]].walk_through(self.creature_type)
         self.position = destination
 
@@ -99,29 +99,29 @@ class Creature(Sprite):
     def __confirm_move(self, destination, condition):
         if condition:
             self.direction = (destination[0] - self.position[0], destination[1] - self.position[1])
-            self.move(destination)
+            self._move(destination)
             return True
         return False
 
     """
     Makes the creature look for the enemy around
     """
-    def look_for_enemy(self):
+    def _look_for_enemy(self):
         adjacent_creatures = [creature for creature in self.creatures if creature is not self]
 
-        self.attack_if_adjacent(*adjacent_creatures)
+        self.__attack_if_adjacent(*adjacent_creatures)
 
     """
     Checks if a certain creature is adjacent to this one
     """
-    def is_adjacent(self, other):
+    def __is_adjacent(self, other):
         return abs(self.position[0] - other.position[0]) <= 1 and abs(self.position[1] - other.position[1]) <= 1
 
     """
     Makes creature attack certain creatures if they are adjacent to this one
     """
-    def attack_if_adjacent(self, *creatures):
-        fighters = [fighter for fighter in creatures if self.is_adjacent(fighter)
+    def __attack_if_adjacent(self, *creatures):
+        fighters = [fighter for fighter in creatures if self.__is_adjacent(fighter)
                     and isinstance(fighter, Creature)
                     and self.creature_type != fighter.creature_type
                     and not fighter.is_in_fight]
@@ -132,7 +132,7 @@ class Creature(Sprite):
     """
     Tries to choose random way to move
     """
-    def choose_random_way(self):
+    def _choose_random_way(self):
         while True:
             raw_direction = random.choice(self.directions)
 
@@ -145,7 +145,7 @@ class Creature(Sprite):
     """
     Tries to look for food around
     """
-    def look_for_food(self):
+    def _look_for_food(self):
         destination = self.position
 
         for direction in self.directions:
@@ -164,7 +164,7 @@ class Creature(Sprite):
     """
     Tries to look for traces around
     """
-    def look_for_traces(self, limit: float, func):
+    def _look_for_traces(self, limit: float, func):
         destination = self.position
 
         for direction in self.directions:
@@ -197,7 +197,7 @@ class Creature(Sprite):
     Checks if the creature is alive
     """
     def __bool__(self):
-        return self.is_alive()
+        return self.__is_alive()
 
 
 class Prey(Creature):
@@ -207,8 +207,8 @@ class Prey(Creature):
     """
     Moves the creature to another position
     """
-    def move(self, destination: tuple):
-        super().move(destination)
+    def _move(self, destination: tuple):
+        super()._move(destination)
 
         if self.map.contains(self.position):
             cell = self.map.data[self.position[0]][self.position[1]]
@@ -230,14 +230,14 @@ class Prey(Creature):
         super().update(map, creatures)
 
         if self.hunger == self.max_hunger:
-            if self.look_for_food():
+            if self._look_for_food():
                 return
 
-        if self.look_for_traces(float('inf'), lambda v, l: v < l):
+        if self._look_for_traces(float('inf'), lambda v, l: v < l):
             return
-        self.choose_random_way()
+        self._choose_random_way()
 
-        self.look_for_enemy()
+        self._look_for_enemy()
 
 
 class Predator(Creature):
@@ -247,8 +247,8 @@ class Predator(Creature):
     """
     Moves the creature to another position
     """
-    def move(self, destination):
-        super().move(destination)
+    def _move(self, destination):
+        super()._move(destination)
 
         target = next((creature for creature in self.creatures if isinstance(creature, Prey)
                        and creature.position == destination), None)
@@ -267,10 +267,10 @@ class Predator(Creature):
     def update(self, map, creatures):
         super().update(map, creatures)
 
-        if self.look_for_food():
+        if self._look_for_food():
             return
-        if self.look_for_traces(float('-inf'), lambda v, l: v > l):
+        if self._look_for_traces(float('-inf'), lambda v, l: v > l):
             return
-        self.choose_random_way()
+        self._choose_random_way()
 
-        self.look_for_enemy()
+        self._look_for_enemy()

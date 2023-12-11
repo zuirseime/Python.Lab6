@@ -27,7 +27,7 @@ class Fight:
         self.survivors = self.creatures
         while len(self.survivors) == len(self.creatures):
             for attacker in self.creatures:
-                if not attacker.is_alive():
+                if not attacker:
                     continue
 
                 targets = [target for target in self.creatures if
