@@ -1,10 +1,11 @@
 from sprite import Sprite
-from fight import Fight
 from creature_type import CreatureType
 import random
 
 
 class Creature(Sprite):
+    __count = 0
+
     directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
     map = None
@@ -14,6 +15,9 @@ class Creature(Sprite):
                  creature_type: CreatureType,
                  max_hp: int = 10, max_strength: int = 10, max_hunger: int = 10) -> None:
         super().__init__(name, position)
+        self.id = Creature.__count
+        Creature.__count += 1
+
         self.creature_type = creature_type
         self.base_hp = max_hp
         self.heal_points = max_hp
@@ -24,21 +28,6 @@ class Creature(Sprite):
 
         self.is_in_fight = False
         self.direction = (0, 0)
-
-    """
-    Conducts a fight
-    """
-    @staticmethod
-    def conduct_fight(random_order: bool, *creatures):
-        for creature in creatures:
-            creature.is_in_fight = True
-
-        if len(creatures) > 0:
-            fight = Fight(*creatures)
-            fight.conduct(random_order)
-
-            if fight:
-                print(fight)
 
     """
     Takes a damage from another creature
@@ -104,32 +93,6 @@ class Creature(Sprite):
         return False
 
     """
-    Makes the creature look for the enemy around
-    """
-    def _look_for_enemy(self):
-        adjacent_creatures = [creature for creature in self.creatures if creature is not self]
-
-        self.__attack_if_adjacent(*adjacent_creatures)
-
-    """
-    Checks if a certain creature is adjacent to this one
-    """
-    def __is_adjacent(self, other):
-        return abs(self.position[0] - other.position[0]) <= 1 and abs(self.position[1] - other.position[1]) <= 1
-
-    """
-    Makes creature attack certain creatures if they are adjacent to this one
-    """
-    def __attack_if_adjacent(self, *creatures):
-        fighters = [fighter for fighter in creatures if self.__is_adjacent(fighter)
-                    and isinstance(fighter, Creature)
-                    and self.creature_type != fighter.creature_type
-                    and not fighter.is_in_fight]
-
-        if fighters:
-            self.conduct_fight(True, *fighters)
-
-    """
     Tries to choose random way to move
     """
     def _choose_random_way(self):
@@ -188,7 +151,7 @@ class Creature(Sprite):
     Builds the string of creature parameters
     """
     def __str__(self):
-        return (f"{self.position} {self.creature_type} | "
+        return (f"{self.creature_type.name}{self.id} | "
                 f"HP: {self.heal_points}/{self.base_hp} "
                 f"S: {self.strength}/{self.base_strength} "
                 f"H: {self.hunger}/{self.max_hunger}")
@@ -229,31 +192,19 @@ class Prey(Creature):
     def update(self, map, creatures):
         super().update(map, creatures)
 
-        if self.hunger == self.max_hunger:
-            if self._look_for_food():
+        if not self.is_in_fight:
+            if self.hunger == self.max_hunger:
+                if self._look_for_food():
+                    return
+
+            if self._look_for_traces(float('inf'), lambda v, l: v < l):
                 return
-
-        if self._look_for_traces(float('inf'), lambda v, l: v < l):
-            return
-        self._choose_random_way()
-
-        self._look_for_enemy()
+            self._choose_random_way()
 
 
 class Predator(Creature):
     def __init__(self, position: tuple) -> None:
         super().__init__("predator", position, CreatureType.Predator, 200, 20, 15)
-
-    """
-    Moves the creature to another position
-    """
-    def _move(self, destination):
-        super()._move(destination)
-
-        target = next((creature for creature in self.creatures if isinstance(creature, Prey)
-                       and creature.position == destination), None)
-        if target and not self.is_in_fight:
-            self.conduct_fight(False, self, target)
 
     """
     Restores creature parameters
@@ -267,10 +218,9 @@ class Predator(Creature):
     def update(self, map, creatures):
         super().update(map, creatures)
 
-        if self._look_for_food():
-            return
-        if self._look_for_traces(float('-inf'), lambda v, l: v > l):
-            return
-        self._choose_random_way()
-
-        self._look_for_enemy()
+        if not self.is_in_fight:
+            if self._look_for_food():
+                return
+            if self._look_for_traces(float('-inf'), lambda v, l: v > l):
+                return
+            self._choose_random_way()

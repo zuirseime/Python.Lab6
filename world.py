@@ -1,6 +1,7 @@
 from globals import *
 from map import Map
-from creatures import *
+from creatures import Predator, Prey
+from fight import Fight
 import random
 from pygame import Surface
 
@@ -11,6 +12,8 @@ class World:
     def __init__(self, map_size: tuple, predators: int, preys: int) -> None:
         self.__map = Map(map_size[0], map_size[1])
         self.__creatures = []
+        self.__fights = []
+        self.conducted_fights = []
 
         self.__time_elapsed = 0
 
@@ -30,17 +33,45 @@ class World:
                     self.__creatures.append(Prey(position))
                     break
 
+    def check_encounters(self):
+        for fight in self.__fights:
+            fight.conduct()
+
+            if fight:
+                self.conducted_fights.append(fight)
+                self.__fights.remove(fight)
+
+        for current in self.__creatures:
+            if not current or current.is_in_fight:
+                continue
+
+            targets = [target for target in self.__creatures if
+                       target is not current and
+                       current.creature_type != target.creature_type and
+                       not target.is_in_fight and
+                       self.__are_adjacent(current, target)]
+
+            if not targets:
+                return
+
+            self.__fights.append(Fight(current, *targets))
+
+    @staticmethod
+    def __are_adjacent(attacker, current):
+        return (abs(attacker.position[0] - current.position[0]) <= 1 and
+                abs(attacker.position[1] - current.position[1]) <= 1)
+
     """
     Goes to the next world state
     """
     def __next_step(self):
+        self.check_encounters()
+
         self.__map.update()
 
-        dead_list = [creature for creature in self.__creatures if not creature]
-        for creature in dead_list:
-            self.__creatures.remove(creature)
-
         for creature in self.__creatures:
+            if not creature:
+                self.__creatures.remove(creature)
             creature.update(self.__map, self.__creatures)
 
     """

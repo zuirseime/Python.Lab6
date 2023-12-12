@@ -12,13 +12,17 @@ class Simulator:
 
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont(None, 30)
 
         Sprite.gen_textures()
 
         self.running = True
 
         self.world = World(MAP_SIZE, PREDATOR_NUMBER, PREY_NUMBER)
+
+    def save_log(self):
+        log = "\n".join([str(fight) for fight in self.world.conducted_fights])
+        with open(LOG_PATH, 'w') as file:
+            file.write(log)
 
     """
     Runs the pygame window
@@ -54,6 +58,7 @@ class Simulator:
     Closes the pygame window
     """
     def close(self):
+        self.save_log()
         pygame.quit()
 
 
