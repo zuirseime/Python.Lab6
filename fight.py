@@ -1,11 +1,11 @@
-import random
 from random import shuffle
 from creature_type import CreatureType
 from datetime import datetime
+from creatures import Creature
 
 
 class Fight:
-    def __init__(self, *creatures) -> None:
+    def __init__(self, *creatures: Creature) -> None:
         self.__start = datetime.now().time()
         self.__end = None
 
@@ -68,15 +68,15 @@ class Fight:
     """
     Returns the state of fight conduction
     """
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.__is_conducted
 
     """
     Returns the string of the fight
     """
-    def __str__(self):
+    def __str__(self) -> str:
         if not self:
-            return
+            return ""
 
         string = (f"Start time: {self.__start} | End time: {self.__end}\n"
                   f"Participants: {self.__creatures_string}\n"

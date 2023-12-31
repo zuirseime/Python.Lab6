@@ -1,6 +1,6 @@
 from globals import *
 from map import Map
-from creatures import Predator, Prey
+from creatures import Predator, Prey, Creature
 from fight import Fight
 import random
 from pygame import Surface
@@ -33,7 +33,7 @@ class World:
                     self.__creatures.append(Prey(position))
                     break
 
-    def check_encounters(self):
+    def __check_encounters(self) -> None:
         for fight in self.__fights:
             fight.conduct()
 
@@ -57,15 +57,15 @@ class World:
             self.__fights.append(Fight(current, *targets))
 
     @staticmethod
-    def __are_adjacent(attacker, current):
+    def __are_adjacent(attacker: Creature, current: Creature) -> bool:
         return (abs(attacker.position[0] - current.position[0]) <= 1 and
                 abs(attacker.position[1] - current.position[1]) <= 1)
 
     """
     Goes to the next world state
     """
-    def __next_step(self):
-        self.check_encounters()
+    def __next_step(self) -> None:
+        self.__check_encounters()
 
         self.__map.update()
 
@@ -77,7 +77,7 @@ class World:
     """
     Updates the parts of the world
     """
-    def update(self, delta_time: int):
+    def update(self, delta_time: int) -> None:
         self.__time_elapsed += delta_time
 
         if self.__time_elapsed >= self.__tick:
@@ -87,7 +87,7 @@ class World:
     """
     Draws the parts of the world
     """
-    def draw(self, screen: Surface):
+    def draw(self, screen: Surface) -> None:
         self.__map.draw(screen)
 
         for creature in self.__creatures:

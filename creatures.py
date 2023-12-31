@@ -1,5 +1,7 @@
+from cell import Cell
 from sprite import Sprite
 from creature_type import CreatureType
+from map import Map
 import random
 
 
@@ -32,26 +34,26 @@ class Creature(Sprite):
     """
     Takes a damage from another creature
     """
-    def take_damage(self, damage: int):
+    def take_damage(self, damage: int) -> None:
         if self.__is_alive():
             self.heal_points -= damage
 
     """
     Makes the creature die
     """
-    def die(self):
+    def die(self) -> None:
         self.heal_points = 0
 
     """
     Checks if the creature is alive
     """
-    def __is_alive(self):
+    def __is_alive(self) -> bool:
         return self.heal_points > 0
 
     """
     Restores creature parameters
     """
-    def restore(self, target):
+    def restore(self, target) -> None:
         self.hunger = 0
         self.heal_points = self.base_hp
         self.strength = self.base_strength
@@ -59,7 +61,7 @@ class Creature(Sprite):
     """
     Updates creature state
     """
-    def update(self, map, creatures: list):
+    def update(self, map: Map, creatures: list) -> None:
         self.map = map
         self.creatures = creatures
 
@@ -78,14 +80,14 @@ class Creature(Sprite):
     """
     Moves the creature to another position
     """
-    def _move(self, destination: tuple):
+    def _move(self, destination: tuple) -> None:
         self.map.data[self.position[0]][self.position[1]].walk_through(self.creature_type)
         self.position = destination
 
     """
     Confirms move
     """
-    def __confirm_move(self, destination, condition):
+    def __confirm_move(self, destination, condition) -> bool:
         if condition:
             self.direction = (destination[0] - self.position[0], destination[1] - self.position[1])
             self._move(destination)
@@ -95,7 +97,7 @@ class Creature(Sprite):
     """
     Tries to choose random way to move
     """
-    def _choose_random_way(self):
+    def _choose_random_way(self) -> bool:
         while True:
             raw_direction = random.choice(self.directions)
 
@@ -108,7 +110,7 @@ class Creature(Sprite):
     """
     Tries to look for food around
     """
-    def _look_for_food(self):
+    def _look_for_food(self) -> bool:
         destination = self.position
 
         for direction in self.directions:
@@ -127,7 +129,7 @@ class Creature(Sprite):
     """
     Tries to look for traces around
     """
-    def _look_for_traces(self, limit: float, func):
+    def _look_for_traces(self, limit: float, func) -> bool:
         destination = self.position
 
         for direction in self.directions:
@@ -150,7 +152,7 @@ class Creature(Sprite):
     """
     Builds the string of creature parameters
     """
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"{self.creature_type.name}{self.id} | "
                 f"HP: {self.heal_points}/{self.base_hp} "
                 f"S: {self.strength}/{self.base_strength} "
@@ -159,7 +161,7 @@ class Creature(Sprite):
     """
     Checks if the creature is alive
     """
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.__is_alive()
 
 
@@ -170,7 +172,7 @@ class Prey(Creature):
     """
     Moves the creature to another position
     """
-    def _move(self, destination: tuple):
+    def _move(self, destination: tuple) -> None:
         super()._move(destination)
 
         if self.map.contains(self.position):
@@ -182,14 +184,14 @@ class Prey(Creature):
     """
     Restores creature parameters
     """
-    def restore(self, cell):
+    def restore(self, cell: Cell) -> None:
         super().restore(cell)
         cell.has_grass = False
 
     """
     Updates creature state
     """
-    def update(self, map, creatures):
+    def update(self, map: Map, creatures: list[Creature]) -> None:
         super().update(map, creatures)
 
         if not self.is_in_fight:
@@ -209,13 +211,13 @@ class Predator(Creature):
     """
     Restores creature parameters
     """
-    def restore(self, target=None):
+    def restore(self, target: Creature = None) -> None:
         super().restore(target)
 
     """
     Updates creature state
     """
-    def update(self, map, creatures):
+    def update(self, map: Map, creatures: list[Creature]) -> None:
         super().update(map, creatures)
 
         if not self.is_in_fight:

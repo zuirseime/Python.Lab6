@@ -22,7 +22,7 @@ class Sprite:
     """
     Draws the sprite
     """
-    def draw(self, surface: Surface):
+    def draw(self, surface: Surface) -> None:
         position = (self.position[0] * SPRITE_SIZE, self.position[1] * SPRITE_SIZE)
         surface.blit(self.image, position)
 

@@ -1,11 +1,11 @@
 from sprite import Sprite
 from creatures import CreatureType
 import random
+from pygame import Surface
 
 
 class Cell(Sprite):
     __grass_birth_probability = 0.02
-
     __grass_cooldown = 5
 
     def __init__(self, position: tuple) -> None:
@@ -18,7 +18,7 @@ class Cell(Sprite):
 
         self.__grass_cooldown_state = 0
 
-    def walk_through(self, trace: CreatureType):
+    def walk_through(self, trace: CreatureType) -> None:
         self.trace_magnitude = 10
 
         self.trace_status = trace
@@ -28,17 +28,17 @@ class Cell(Sprite):
         elif trace == CreatureType.Prey:
             self.__steps_texture = Sprite("prey_steps", self.position)
 
-    def __fade_out(self):
+    def __fade_out(self) -> None:
         self.trace_magnitude -= 1
 
-    def __grow_grass(self):
+    def __grow_grass(self) -> None:
         if self.__grass_cooldown_state == self.__grass_cooldown:
             if random.random() <= self.__grass_birth_probability:
                 self.has_grass = True
             else:
                 self.__grass_cooldown_state = 0
 
-    def update(self):
+    def update(self) -> None:
         if self.__grass_cooldown_state < self.__grass_cooldown:
             self.__grass_cooldown_state += 1
         else:
@@ -50,7 +50,7 @@ class Cell(Sprite):
             self.trace_status = CreatureType.Null
             self.__steps_texture = None
 
-    def draw(self, surface):
+    def draw(self, surface: Surface) -> None:
         super().draw(surface)
 
         if self.has_grass is True:
